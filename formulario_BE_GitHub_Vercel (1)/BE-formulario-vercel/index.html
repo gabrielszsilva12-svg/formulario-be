@@ -73,6 +73,25 @@ textarea{min-height:180px;font-size:16px;padding:18px}
 .chip svg{width:26px;height:26px;flex:none}
 .panel:has(h1) .btn.main{padding:18px 40px;font-size:14px;font-weight:700;font-synthesis:weight;letter-spacing:.1em;text-transform:uppercase}
 @media(max-width:620px){main{padding:20px 14px 40px}.panel{padding:4px}.opt{padding:15px 14px;min-height:60px;font-size:15px}.chips{gap:8px}}
+
+/* Pergunta de recompra/indicação e comentários na mesma tela final */
+.subheading{font-size:clamp(17px,2.3vw,21px);line-height:1.3;letter-spacing:0;text-transform:none;margin:0 0 10px;font-weight:700}
+.subnote{color:var(--mute);font-size:15px;line-height:1.55;margin:0 0 18px}
+.referral{padding-bottom:30px;border-bottom:1px solid var(--line);margin-bottom:28px}
+.yesno{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.yesno .opt{min-height:58px;padding:14px 16px}
+.yesno .k{width:28px;height:28px}
+.contact-fields{margin-top:24px;padding:22px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.025)}
+.contact-fields[hidden]{display:none}
+.field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.field{display:flex;flex-direction:column;gap:9px;min-width:0;color:var(--ink);font-size:14px}
+.field span b{color:#c4c4c7;font-weight:400}
+.field input{width:100%;min-width:0;font:inherit;font-size:15px;color:var(--ink);background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:12px;padding:14px 15px;outline-offset:3px}
+.field input::placeholder{color:#7d7d80}
+.privacy-note{font-size:12px;line-height:1.5;color:var(--mute);margin:14px 0 0}
+.comments .subheading{margin-bottom:8px}
+.comments .subnote{margin-bottom:16px}
+@media(max-width:560px){.yesno,.field-grid{grid-template-columns:1fr}.contact-fields{padding:16px}.yesno .opt{min-height:56px}}
 </style></head>
 <body>
 <div class="bg"></div>
@@ -91,31 +110,41 @@ const Q=[
 {t:"Você recebe o acompanhamento de obra?",n:"Queremos que acompanhar a sua futura moradia seja simples e inspirador.",o:["Sim, com frequência","Às vezes","Raramente","Ainda não recebi","Não sabia que existia"]},
 {t:"Quando precisa falar com a BE, como é o contato e o suporte?",n:"Estar por perto faz parte do nosso cuidado com você.",o:["Rápido e atencioso","Bom, mas poderia ser mais ágil","Demorei a receber um retorno","Ainda não precisei entrar em contato","Prefiro outros canais de atendimento"]},
 {t:"O que mais ajudaria a melhorar a sua experiência?",n:"Você pode escolher mais de uma opção.",m:1,o:["Mais comunicação sobre o andamento da obra","Atualizações mais visuais, com fotos e vídeos","Atendimento e respostas mais ágeis","Mais clareza em prazos, contratos e documentos","Momentos de proximidade e encontros com a BE"]},
-{t:"Quer nos contar mais?",n:"Escreva do seu jeito, sem pressa. A sua resposta é muito bem-vinda.",open:1}
+{t:"Novas histórias com a BE",n:"Você teria interesse em conhecer uma nova oportunidade com a BE ou indicar alguém que também possa se interessar pelos nossos empreendimentos?",open:1}
 ];
 let i=-1;const A=[];let txt="";
+const indicacao={interesse:"",nome:"",sobrenome:"",celular:"",email:""};
 const pad=n=>String(n).padStart(2,"0");
 const p=document.getElementById("p");
 function show(h){p.innerHTML=h;p.classList.remove("fade");void p.offsetWidth;p.classList.add("fade");window.scrollTo({top:0})}
 function render(){
- if(i<0)return show(`<span class="badge"><i></i>Pesquisa exclusiva</span><h1>Conte como é <em>viver a BE</em> e ajude a cuidar <em>ainda melhor</em> de você.</h1><p class="lead">Para a BE, morar bem é um estilo de vida, e cuidar de pessoas é o centro de tudo o que fazemos. Conte como tem sido a sua experiência: cada resposta é muito bem-vinda.</p><div class="chips"><span class="chip"><svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="13" fill="#f3f3f1"/><text x="13" y="18.5" text-anchor="middle" font-size="15" font-weight="700" fill="#0b0b0c" font-family="Arial,sans-serif">?</text></svg>6 perguntas</span><span class="chip"><svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="13" fill="#f3f3f1"/><circle cx="13" cy="13" r="8" fill="none" stroke="#0b0b0c" stroke-width="2"/><path d="M13 8.5V13l3 2" fill="none" stroke="#0b0b0c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>2 minutos</span></div><button class="btn main" id="go">Começar</button>`),document.getElementById("go").onclick=()=>{i=0;render()};
+ if(i<0)return show(`<span class="badge"><i></i>Pesquisa exclusiva</span><h1>Conte como é <em>viver a BE</em> e ajude a cuidar <em>ainda melhor</em> de você.</h1><p class="lead">Para a BE, morar bem é um estilo de vida, e cuidar de pessoas é o centro de tudo o que fazemos. Conte como tem sido a sua experiência: cada resposta é muito bem-vinda.</p><div class="chips"><span class="chip"><svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="13" fill="#f3f3f1"/><text x="13" y="18.5" text-anchor="middle" font-size="15" font-weight="700" fill="#0b0b0c" font-family="Arial,sans-serif">?</text></svg>6 etapas</span><span class="chip"><svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="13" fill="#f3f3f1"/><circle cx="13" cy="13" r="8" fill="none" stroke="#0b0b0c" stroke-width="2"/><path d="M13 8.5V13l3 2" fill="none" stroke="#0b0b0c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>2 minutos</span></div><button class="btn main" id="go">Começar</button>`),document.getElementById("go").onclick=()=>{i=0;render()};
  if(i>=Q.length)return show(`<h1>Obrigado por estar com a BE.</h1><p class="lead">A sua participação é muito importante e vai nos ajudar a cuidar ainda melhor de você. Que a sua moradia seja sempre um lugar de bem-estar.</p>`);
  const q=Q[i],last=i===Q.length-1;
- const body=q.open?`<textarea id="ta" placeholder="O que você sentiu, o que poderia ser melhor, o que gostaria de ver na BE…" aria-label="Sua mensagem"></textarea>`:`<div class="opts">${q.o.map((o,k)=>`<button class="opt" data-k="${k}" aria-pressed="false"><span class="k">${L[k]}</span><span>${o}</span></button>`).join("")}</div>`;
- show(`<div class="count">Pergunta <b>${pad(i+1)}</b> / ${pad(Q.length)}</div><div class="bar"><i style="width:${i/Q.length*100}%"></i></div><h2>${q.t}</h2><p class="note">${q.n}</p>${body}<div class="foot"><button class="btn ghost" id="bk">Voltar</button><div class="r"><span class="hint" id="ht"></span><button class="btn main" id="nx"></button></div></div>`);
+ const body=q.open?`<section class="referral"><div class="opts yesno" role="group" aria-label="Interesse em recompra ou indicação"><button type="button" class="opt" data-interest="sim" aria-pressed="false"><span class="k">✓</span><span>Sim, tenho interesse</span></button><button type="button" class="opt" data-interest="nao" aria-pressed="false"><span class="k">—</span><span>No momento, não</span></button></div><div id="contact-fields" class="contact-fields" hidden><p class="subnote">Que bom! Conte quem é a pessoa interessada para que possamos dar continuidade com cuidado.</p><div class="field-grid"><label class="field"><span>Nome <b>*</b></span><input id="ref-nome" autocomplete="given-name" maxlength="100" placeholder="Nome" /></label><label class="field"><span>Sobrenome <b>*</b></span><input id="ref-sobrenome" autocomplete="family-name" maxlength="100" placeholder="Sobrenome" /></label><label class="field"><span>Celular</span><input id="ref-celular" type="tel" autocomplete="tel" maxlength="30" placeholder="(00) 00000-0000" /></label><label class="field"><span>E-mail</span><input id="ref-email" type="email" autocomplete="email" maxlength="150" placeholder="nome@exemplo.com" /></label></div><p class="privacy-note">Preencha pelo menos um contato: celular ou e-mail. Compartilhe esses dados apenas se tiver autorização da pessoa indicada.</p></div></section><section class="comments"><h3 class="subheading">E, se quiser, deixe um comentário</h3><p class="subnote">Há algo mais que gostaria de compartilhar? Vamos adorar ouvir você.</p><textarea id="ta" placeholder="O que você sentiu, o que poderia ser melhor, o que gostaria de ver na BE…" aria-label="Sua mensagem"></textarea></section>`:`<div class="opts">${q.o.map((o,k)=>`<button class="opt" data-k="${k}" aria-pressed="false"><span class="k">${L[k]}</span><span>${o}</span></button>`).join("")}</div>`;
+ show(`<div class="count">Etapa <b>${pad(i+1)}</b> / ${pad(Q.length)}</div><div class="bar"><i style="width:${i/Q.length*100}%"></i></div><h2>${q.t}</h2><p class="note">${q.n}</p>${body}<div class="foot"><button class="btn ghost" id="bk">Voltar</button><div class="r"><span class="hint" id="ht"></span><button class="btn main" id="nx"></button></div></div>`);
  requestAnimationFrame(()=>{const b=p.querySelector(".bar i");if(b)b.style.width=(i+1)/Q.length*100+"%"});
  document.getElementById("bk").onclick=()=>{i--;render()};
  const nx=document.getElementById("nx"),ht=document.getElementById("ht");
  nx.textContent=last?"Enviar respostas":"Avançar";
  function sync(){
-  p.querySelectorAll(".opt").forEach(b=>b.setAttribute("aria-pressed",(A[i]||[]).includes(+b.dataset.k)));
-  const ok=q.open||(A[i]||[]).length>0;nx.disabled=!ok;
-  ht.textContent=q.open?"Opcional, mas muito bem-vinda":ok?"Tudo certo, pode seguir":q.m?"Selecione uma ou mais opções para seguir":"Selecione uma opção para seguir";
+  p.querySelectorAll(".opt[data-k]").forEach(b=>b.setAttribute("aria-pressed",(A[i]||[]).includes(+b.dataset.k)));
+  p.querySelectorAll(".opt[data-interest]").forEach(b=>b.setAttribute("aria-pressed",indicacao.interesse===b.dataset.interest));
+  const phone=(indicacao.celular||"").trim(),email=(indicacao.email||"").trim();
+  const contactValid=phone.length>0||email.length>0;
+  const emailValid=!email||/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);
+  const referralValid=indicacao.interesse==="nao"||(indicacao.interesse==="sim"&&indicacao.nome.trim()&&indicacao.sobrenome.trim()&&contactValid&&emailValid);
+  const ok=q.open?(!!indicacao.interesse&&referralValid):(A[i]||[]).length>0;nx.disabled=!ok;
+  ht.textContent=q.open?(!indicacao.interesse?"Escolha uma opção para continuar":indicacao.interesse==="sim"&&!referralValid?"Preencha nome, sobrenome e celular ou e-mail":"Comentário opcional"):ok?"Tudo certo, pode seguir":q.m?"Selecione uma ou mais opções para seguir":"Selecione uma opção para seguir";
+  const fields=document.getElementById("contact-fields");if(fields)fields.hidden=indicacao.interesse!=="sim";
  }
- if(q.open){const ta=document.getElementById("ta");ta.value=txt;ta.oninput=()=>txt=ta.value}
- p.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{const k=+b.dataset.k,a=A[i]||[];A[i]=q.m?(a.includes(k)?a.filter(x=>x!==k):[...a,k]):[k];sync()});
- nx.onclick=()=>last?send():(i++,render());
- sync();
+ if(q.open){
+  const ta=document.getElementById("ta");ta.value=txt;ta.oninput=()=>txt=ta.value;
+  [["ref-nome","nome"],["ref-sobrenome","sobrenome"],["ref-celular","celular"],["ref-email","email"]].forEach(([id,key])=>{const el=document.getElementById(id);el.value=indicacao[key];el.oninput=()=>{indicacao[key]=el.value;sync()}});
+  p.querySelectorAll(".opt[data-interest]").forEach(b=>b.onclick=()=>{indicacao.interesse=b.dataset.interest;sync()});
+ }
+ p.querySelectorAll(".opt[data-k]").forEach(b=>b.onclick=()=>{const k=+b.dataset.k,a=A[i]||[];A[i]=q.m?(a.includes(k)?a.filter(x=>x!==k):[...a,k]):[k];sync()});
+ nx.onclick=()=>last?send():(i++,render());sync();
 }
 async function send(){
  const nx=document.getElementById("nx");
@@ -128,7 +157,8 @@ async function send(){
      pergunta:q.t,
      escolhas:(A[k]||[]).map(x=>q.o[x])
    })),
-   mensagem:txt.trim()
+   mensagem:txt.trim(),
+   indicacao:{interesse:indicacao.interesse==="sim"?"Sim":indicacao.interesse==="nao"?"Não":"",nome:indicacao.interesse==="sim"?indicacao.nome.trim():"",sobrenome:indicacao.interesse==="sim"?indicacao.sobrenome.trim():"",celular:indicacao.interesse==="sim"?indicacao.celular.trim():"",email:indicacao.interesse==="sim"?indicacao.email.trim():""}
  };
  if(!GOOGLE_APPS_SCRIPT_URL || GOOGLE_APPS_SCRIPT_URL==="COLE_AQUI_A_URL_DO_APPS_SCRIPT" || !GOOGLE_APPS_SCRIPT_URL.endsWith("/exec")){
    nx.disabled=false;
