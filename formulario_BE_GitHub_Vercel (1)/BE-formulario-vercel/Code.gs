@@ -12,7 +12,7 @@
  */
 
 const SPREADSHEET_ID = "1oXyHoXg4fk2HdPCt3DiM0yKahf-Yrt7KspGS-WBqHJQ";
-const SHEET_NAME = "Respostas BE";
+const SHEET_NAME = "Respostas";
 
 const HEADERS = [
   "Data/hora",
