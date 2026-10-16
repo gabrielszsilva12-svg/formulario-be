@@ -21,18 +21,34 @@ const HEADERS = [
   "Você recebe o acompanhamento de obra?",
   "Quando precisa falar com a BE, como é o contato e o suporte?",
   "O que mais ajudaria a melhorar a sua experiência?",
-  "Quer nos contar mais?"
+  "Quer nos contar mais?",
+  "Interesse em recompra ou indicação",
+  "Nome da pessoa interessada",
+  "Sobrenome da pessoa interessada",
+  "Celular da pessoa interessada",
+  "E-mail da pessoa interessada"
 ];
 
 function setupSheet() {
   const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   let sheet = spreadsheet.getSheetByName(SHEET_NAME);
   if (!sheet) sheet = spreadsheet.insertSheet(SHEET_NAME);
+  ensureHeaders_(sheet);
+  return "Planilha configurada: " + spreadsheet.getUrl();
+}
+
+
+function ensureHeaders_(sheet) {
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(HEADERS);
     sheet.setFrozenRows(1);
+    return;
   }
-  return "Planilha configurada: " + spreadsheet.getUrl();
+  const width=Math.max(sheet.getLastColumn(),1);
+  const existing=sheet.getRange(1,1,1,width).getValues()[0].map(function(v){return String(v||"").trim();});
+  const missing=HEADERS.filter(function(header){return existing.indexOf(header)===-1;});
+  if(missing.length)sheet.getRange(1,width+1,1,missing.length).setValues([missing]);
+  sheet.setFrozenRows(1);
 }
 
 function doPost(e) {
@@ -60,7 +76,12 @@ function doPost(e) {
       byQuestion[HEADERS[3]] || "",
       byQuestion[HEADERS[4]] || "",
       byQuestion[HEADERS[5]] || "",
-      typeof data.mensagem === "string" ? data.mensagem : ""
+      typeof data.mensagem === "string" ? data.mensagem : "",
+      data.indicacao && data.indicacao.interesse ? data.indicacao.interesse : "",
+      data.indicacao && data.indicacao.interesse === "Sim" ? (data.indicacao.nome || "") : "",
+      data.indicacao && data.indicacao.interesse === "Sim" ? (data.indicacao.sobrenome || "") : "",
+      data.indicacao && data.indicacao.interesse === "Sim" ? (data.indicacao.celular || "") : "",
+      data.indicacao && data.indicacao.interesse === "Sim" ? (data.indicacao.email || "") : ""
     ];
 
     const lock = LockService.getScriptLock();
@@ -68,14 +89,8 @@ function doPost(e) {
     try {
       const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
       let sheet = spreadsheet.getSheetByName(SHEET_NAME);
-      if (!sheet) {
-        sheet = spreadsheet.insertSheet(SHEET_NAME);
-        sheet.appendRow(HEADERS);
-        sheet.setFrozenRows(1);
-      } else if (sheet.getLastRow() === 0) {
-        sheet.appendRow(HEADERS);
-        sheet.setFrozenRows(1);
-      }
+      if (!sheet) sheet = spreadsheet.insertSheet(SHEET_NAME);
+      ensureHeaders_(sheet);
       sheet.appendRow(row);
     } finally {
       lock.releaseLock();
