@@ -117,11 +117,12 @@ function render(){
  nx.onclick=()=>last?send():(i++,render());
  sync();
 }
-async function send(){
+async function send(){async function send(){
  const nx=document.getElementById("nx");
  const originalText=nx.textContent;
  nx.disabled=true;
  nx.textContent="Enviando…";
+
  const d={
    em:new Date().toISOString(),
    respostas:Q.filter(q=>!q.open).map((q,k)=>({
@@ -130,7 +131,8 @@ async function send(){
    })),
    mensagem:txt.trim()
  };
- if(!GOOGLE_APPS_SCRIPT_URL || GOOGLE_APPS_SCRIPT_URL==="https://script.google.com/macros/s/AKfycby4ZVltSk4Af0ROzQtDrfqwo2CiXd6ytQtwB2V_STfq_6f4jR5kxhhOsr3Z8gy-Jua7KQ/exec " || !GOOGLE_APPS_SCRIPT_URL.endsWith("/exec")){
+
+ if(!GOOGLE_APPS_SCRIPT_URL || !GOOGLE_APPS_SCRIPT_URL.endsWith("/exec")){
    nx.disabled=false;
    nx.textContent=originalText;
    let aviso=document.getElementById("send-error");
@@ -141,11 +143,54 @@ async function send(){
      aviso.style.cssText="color:#b42318;font-size:14px;margin-top:14px;line-height:1.5";
      nx.closest(".r").appendChild(aviso);
    }
-   aviso.textContent="A integração com o Google Planilhas ainda não foi configurada. Suas respostas continuam nesta tela. Tente novamente mais tarde.";
+   aviso.textContent="A URL do Apps Script não foi configurada corretamente.";
    return;
  }
- try{
-   const corpo=new URLSearchParams({payload:JSON.stringify(d)});
+
+ try {
+   const form = document.createElement('form');
+   form.method = 'POST';
+   form.action = GOOGLE_APPS_SCRIPT_URL;
+   form.target = 'hidden_iframe';
+
+   const input = document.createElement('input');
+   input.type = 'hidden';
+   input.name = 'payload';
+   input.value = JSON.stringify(d);
+   form.appendChild(input);
+
+   let iframe = document.getElementById('hidden_iframe');
+   if (!iframe) {
+     iframe = document.createElement('iframe');
+     iframe.name = 'hidden_iframe';
+     iframe.id = 'hidden_iframe';
+     iframe.style.display = 'none';
+     document.body.appendChild(iframe);
+   }
+
+   document.body.appendChild(form);
+   form.submit();
+   document.body.removeChild(form);
+
+   setTimeout(() => {
+     i = Q.length;
+     render();
+   }, 800);
+
+ } catch(e){
+   nx.disabled=false;
+   nx.textContent=originalText;
+   let aviso=document.getElementById("send-error");
+   if(!aviso){
+     aviso=document.createElement("p");
+     aviso.id="send-error";
+     aviso.setAttribute("role","alert");
+     aviso.style.cssText="color:#b42318;font-size:14px;margin-top:14px;line-height:1.5";
+     nx.closest(".r").appendChild(aviso);
+   }
+   aviso.textContent="Não foi possível enviar. Verifique sua conexão e tente novamente.";
+ }
+}});
    // O Apps Script recebe o formulário; no-cors impede ler a resposta no navegador.
    await fetch(GOOGLE_APPS_SCRIPT_URL,{method:"POST",mode:"no-cors",body:corpo});
    try{
