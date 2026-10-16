@@ -132,7 +132,7 @@ function render(){
   p.querySelectorAll(".opt[data-interest]").forEach(b=>b.setAttribute("aria-pressed",indicacao.interesse===b.dataset.interest));
   const phone=(indicacao.celular||"").trim(),email=(indicacao.email||"").trim();
   const contactValid=phone.length>0||email.length>0;
-  const emailValid=!email||/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);
+  const emailValid=!email||/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const referralValid=indicacao.interesse==="nao"||(indicacao.interesse==="sim"&&indicacao.nome.trim()&&indicacao.sobrenome.trim()&&contactValid&&emailValid);
   const ok=q.open?(!!indicacao.interesse&&referralValid):(A[i]||[]).length>0;nx.disabled=!ok;
   ht.textContent=q.open?(!indicacao.interesse?"Escolha uma opção para continuar":indicacao.interesse==="sim"&&!referralValid?"Preencha nome, sobrenome e celular ou e-mail":"Comentário opcional"):ok?"Tudo certo, pode seguir":q.m?"Selecione uma ou mais opções para seguir":"Selecione uma opção para seguir";
