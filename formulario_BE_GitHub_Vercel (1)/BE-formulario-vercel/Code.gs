@@ -69,20 +69,20 @@ function doPost(e) {
     });
 
     const timestamp = data.em ? new Date(data.em) : new Date();
-    const row = [
-      timestamp,
-      byQuestion[HEADERS[1]] || "",
-      byQuestion[HEADERS[2]] || "",
-      byQuestion[HEADERS[3]] || "",
-      byQuestion[HEADERS[4]] || "",
-      byQuestion[HEADERS[5]] || "",
-      typeof data.mensagem === "string" ? data.mensagem : "",
-      data.indicacao && data.indicacao.interesse ? data.indicacao.interesse : "",
-      data.indicacao && data.indicacao.interesse === "Sim" ? (data.indicacao.nome || "") : "",
-      data.indicacao && data.indicacao.interesse === "Sim" ? (data.indicacao.sobrenome || "") : "",
-      data.indicacao && data.indicacao.interesse === "Sim" ? (data.indicacao.celular || "") : "",
-      data.indicacao && data.indicacao.interesse === "Sim" ? (data.indicacao.email || "") : ""
-    ];
+    const valuesByHeader = {
+      "Data/hora": timestamp,
+      "Como você se sente sendo cliente BE hoje?": byQuestion[HEADERS[1]] || "",
+      "Como foi a sua experiência no processo de compra?": byQuestion[HEADERS[2]] || "",
+      "Você recebe o acompanhamento de obra?": byQuestion[HEADERS[3]] || "",
+      "Quando precisa falar com a BE, como é o contato e o suporte?": byQuestion[HEADERS[4]] || "",
+      "O que mais ajudaria a melhorar a sua experiência?": byQuestion[HEADERS[5]] || "",
+      "Quer nos contar mais?": typeof data.mensagem === "string" ? data.mensagem : "",
+      "Interesse em recompra ou indicação": data.indicacao && data.indicacao.interesse ? data.indicacao.interesse : "",
+      "Nome da pessoa interessada": data.indicacao && data.indicacao.interesse === "Sim" ? (data.indicacao.nome || "") : "",
+      "Sobrenome da pessoa interessada": data.indicacao && data.indicacao.interesse === "Sim" ? (data.indicacao.sobrenome || "") : "",
+      "Celular da pessoa interessada": data.indicacao && data.indicacao.interesse === "Sim" ? (data.indicacao.celular || "") : "",
+      "E-mail da pessoa interessada": data.indicacao && data.indicacao.interesse === "Sim" ? (data.indicacao.email || "") : ""
+    };
 
     const lock = LockService.getScriptLock();
     lock.waitLock(10000);
@@ -91,6 +91,11 @@ function doPost(e) {
       let sheet = spreadsheet.getSheetByName(SHEET_NAME);
       if (!sheet) sheet = spreadsheet.insertSheet(SHEET_NAME);
       ensureHeaders_(sheet);
+      const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0]
+        .map(function(value) { return String(value || "").trim(); });
+      const row = headers.map(function(header) {
+        return Object.prototype.hasOwnProperty.call(valuesByHeader, header) ? valuesByHeader[header] : "";
+      });
       sheet.appendRow(row);
     } finally {
       lock.releaseLock();
