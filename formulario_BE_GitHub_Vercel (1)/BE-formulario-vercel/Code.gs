@@ -14,6 +14,13 @@
 const SPREADSHEET_ID = "1oXyHoXg4fk2HdPCt3DiM0yKahf-Yrt7KspGS-WBqHJQ";
 const SHEET_NAME = "Respostas";
 
+// Reutiliza uma aba de respostas já existente para não separar os novos registros dos antigos.
+function getResponseSheet_(spreadsheet) {
+  return spreadsheet.getSheetByName("Respostas BE") ||
+    spreadsheet.getSheetByName("Respostas") ||
+    (spreadsheet.getSheets().length ? spreadsheet.getSheets()[0] : spreadsheet.insertSheet(SHEET_NAME));
+}
+
 const HEADERS = [
   "Data/hora",
   "Como você se sente sendo cliente BE hoje?",
@@ -31,8 +38,7 @@ const HEADERS = [
 
 function setupSheet() {
   const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
-  let sheet = spreadsheet.getSheetByName(SHEET_NAME);
-  if (!sheet) sheet = spreadsheet.insertSheet(SHEET_NAME);
+  let sheet = getResponseSheet_(spreadsheet);
   ensureHeaders_(sheet);
   return "Planilha configurada: " + spreadsheet.getUrl();
 }
@@ -88,8 +94,7 @@ function doPost(e) {
     lock.waitLock(10000);
     try {
       const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
-      let sheet = spreadsheet.getSheetByName(SHEET_NAME);
-      if (!sheet) sheet = spreadsheet.insertSheet(SHEET_NAME);
+      let sheet = getResponseSheet_(spreadsheet);
       ensureHeaders_(sheet);
       const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0]
         .map(function(value) { return String(value || "").trim(); });
