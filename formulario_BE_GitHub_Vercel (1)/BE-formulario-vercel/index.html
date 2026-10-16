@@ -130,7 +130,7 @@ async function send(){
    })),
    mensagem:txt.trim()
  };
- if(!GOOGLE_APPS_SCRIPT_URL || GOOGLE_APPS_SCRIPT_URL==="COLE_AQUI_A_URL_DO_APPS_SCRIPT" || !GOOGLE_APPS_SCRIPT_URL.endsWith("/exec")){
+ if(!GOOGLE_APPS_SCRIPT_URL || GOOGLE_APPS_SCRIPT_URL==="https://script.google.com/macros/s/AKfycbwzH1S5hGC-q4Zx3Zh8FgvZ9we_NpDbcR_phCa-FVelCRLAJjQ9jgPf1T-8ZXkeQVOx/exec" || !GOOGLE_APPS_SCRIPT_URL.endsWith("/exec")){
    nx.disabled=false;
    nx.textContent=originalText;
    let aviso=document.getElementById("send-error");
